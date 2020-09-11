@@ -7,7 +7,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 DEBUG = True
 
 # Connect to the database
-SQLALCHEMY_DATABASE_URI = 'postgresql://david:pass234@localhost:5432/fyyurdb'
+SQLALCHEMY_DATABASE_URI = 'postgresql://david:pass234@localhost:5432/firedb'
 
 
 # Switch track modifications off to suppress warning message.
