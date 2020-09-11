@@ -11,6 +11,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = \
 db = SQLAlchemy(app)
 
 
+@dataclass
 class Artist(db.Model):
     __tablename__ = "Artist"
     id: int = db.Column(db.Integer, primary_key=True)
@@ -29,22 +30,16 @@ class Artist(db.Model):
     genres: List[str] = db.relationship("ArtistGenre", backref="artist")
     venues: List[str] = db.relationship("Show", back_populates="artist")
 
-    def __repr__(self):
-        return f"<Artist {self.id}: {self.name}, " \
-               f"{self.seeking_venue}, {self.seeking_description}\n" \
-               f" Address: {self.city}, {self.state}, {self.phone}>"
 
-
+@dataclass
 class ArtistGenre(db.Model):
     __tablename__ = "ArtistGenre"
     id: int = db.Column(db.Integer, primary_key=True)
     artist_id: int = db.Column(db.Integer, db.ForeignKey("Artist.id"))
     genre: int = db.Column(db.String(30), nullable=False)
 
-    def __repr__(self):
-        return f"<ArtistGenre {self.id}: {self.artist}, {self.genre}"
 
-
+@dataclass
 class Venue(db.Model):
     __tablename__ = "Venue"
     id: int = db.Column(db.Integer, primary_key=True)
@@ -64,23 +59,16 @@ class Venue(db.Model):
     genres: List[str] = db.relationship("VenueGenre", backref="venue")
     artists: List[str] = db.relationship("Show", back_populates="venue")
 
-    def __repr__(self):
-        return f"<Venue {self.id}: {self.name}, " \
-               f"{self.seeking_talent}, {self.seeking_description}\n" \
-               f" Address: {self.street}, {self. city}, " \
-               f"{self.state}, {self.phone}>"
 
-
+@dataclass
 class VenueGenre(db.Model):
     __tablename__ = "VenueGenre"
     id: int = db.Column(db.Integer, primary_key=True)
     venue_id: int = db.Column(db.Integer, db.ForeignKey("Venue.id"))
     genre: str = db.Column(db.String(30), nullable=False)
 
-    def __repr__(self):
-        return f"<VenueGenre {self.id}: {self.venue}, {self.genre}"
 
-
+@dataclass
 class Show(db.Model):
     __tablename__ = "Show"
     id: int = db.Column(db.Integer, primary_key=True)
@@ -192,7 +180,7 @@ def init_load():
 
 
 # set-up tables and load initial data
-if __name__ == "main":
+if __name__ == "__main__":
     db.drop_all()
     db.create_all()
     init_load()
