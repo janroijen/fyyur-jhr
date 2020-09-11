@@ -1,6 +1,8 @@
-from flask import Flask, jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dataclasses import dataclass
+from typing import List
+from datetime import datetime
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -8,44 +10,36 @@ app.config["SQLALCHEMY_DATABASE_URI"] = \
     "postgresql://david:pass234@localhost:5432/firedb"
 db = SQLAlchemy(app)
 
-show = db.Table('show',
-                db.Column('artist_id', db.Integer,
-                          db.ForeignKey('Artist.id'), primary_key=True),
-                db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'),
-                          primary_key=True),
-                db.Column('start_time', db.DateTime, nullable=False))
 
-
-@dataclass
 class Artist(db.Model):
     __tablename__ = "Artist"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    name: str = db.Column(db.String(), nullable=False)
 
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(2), nullable=False)
-    phone = db.Column(db.String(12), nullable=False)
-    website = db.Column(db.String(120), nullable=True)
-    facebook_link = db.Column(db.String(120), nullable=True)
-    image_link = db.Column(db.String(500), nullable=True)
+    city: str = db.Column(db.String(120), nullable=False)
+    state: str = db.Column(db.String(2), nullable=False)
+    phone: str = db.Column(db.String(12), nullable=False)
+    website: str = db.Column(db.String(120), nullable=True)
+    facebook_link: str = db.Column(db.String(120), nullable=True)
+    image_link: str = db.Column(db.String(500), nullable=True)
 
-    seeking_venue = db.Column(db.Boolean, nullable=False, default=False)
-    seeking_description = db.Column(db.String(120), nullable=False, default="")
-    genres = db.relationship("ArtistGenre", backref="artist")
-    venues = db.relationship("Venue", secondary=show, back_populates="artists")
+    seeking_venue: bool = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description: str = db.Column(db.String(120), nullable=False,
+                                         default="")
+    genres: List[str] = db.relationship("ArtistGenre", backref="artist")
+    venues: List[str] = db.relationship("Show", back_populates="artist")
 
     def __repr__(self):
         return f"<Artist {self.id}: {self.name}, " \
-               f"{self.seeking_talent}, {self.seeking_description}\n" \
-               f" Address: {self.street}, {self. city}, " \
-               f"{self.state}, {self.phone}>"
+               f"{self.seeking_venue}, {self.seeking_description}\n" \
+               f" Address: {self.city}, {self.state}, {self.phone}>"
 
 
 class ArtistGenre(db.Model):
     __tablename__ = "ArtistGenre"
-    id = db.Column(db.Integer, primary_key=True)
-    artist_id = db.Column(db.Integer, db.ForeignKey("Artist.id"))
-    genre = db.Column(db.String(30), nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    artist_id: int = db.Column(db.Integer, db.ForeignKey("Artist.id"))
+    genre: int = db.Column(db.String(30), nullable=False)
 
     def __repr__(self):
         return f"<ArtistGenre {self.id}: {self.artist}, {self.genre}"
@@ -53,21 +47,22 @@ class ArtistGenre(db.Model):
 
 class Venue(db.Model):
     __tablename__ = "Venue"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(), nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    name: str = db.Column(db.String(), nullable=False)
 
-    address = db.Column(db.String(120), nullable=False)
-    city = db.Column(db.String(120), nullable=False)
-    state = db.Column(db.String(2), nullable=False)
-    phone = db.Column(db.String(12), nullable=False)
-    website = db.Column(db.String(120), nullable=True)
-    facebook_link = db.Column(db.String(120), nullable=True)
-    image_link = db.Column(db.String(500), nullable=True)
+    address: str = db.Column(db.String(120), nullable=False)
+    city: str = db.Column(db.String(120), nullable=False)
+    state: str = db.Column(db.String(2), nullable=False)
+    phone: str = db.Column(db.String(12), nullable=False)
+    website: str = db.Column(db.String(120), nullable=True)
+    facebook_link: str = db.Column(db.String(120), nullable=True)
+    image_link: str = db.Column(db.String(500), nullable=True)
 
-    seeking_talent = db.Column(db.Boolean, nullable=False, default=False)
-    seeking_description = db.Column(db.String(120), nullable=False, default="")
-    genres = db.relationship("VenueGenre", backref="venue")
-    artists = db.relationship("Artist", secondary=show, back_populates="venues")
+    seeking_talent: bool = db.Column(db.Boolean, nullable=False, default=False)
+    seeking_description: str = db.Column(db.String(120), nullable=False,
+                                         default="")
+    genres: List[str] = db.relationship("VenueGenre", backref="venue")
+    artists: List[str] = db.relationship("Show", back_populates="venue")
 
     def __repr__(self):
         return f"<Venue {self.id}: {self.name}, " \
@@ -78,15 +73,29 @@ class Venue(db.Model):
 
 class VenueGenre(db.Model):
     __tablename__ = "VenueGenre"
-    id = db.Column(db.Integer, primary_key=True)
-    venue_id = db.Column(db.Integer, db.ForeignKey("Venue.id"))
-    genre = db.Column(db.String(30), nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    venue_id: int = db.Column(db.Integer, db.ForeignKey("Venue.id"))
+    genre: str = db.Column(db.String(30), nullable=False)
 
     def __repr__(self):
-        return f"<VenueGenre {self.id}: {self.artist}, {self.genre}"
+        return f"<VenueGenre {self.id}: {self.venue}, {self.genre}"
 
 
-def init_load_artists():
+class Show(db.Model):
+    __tablename__ = "Show"
+    id: int = db.Column(db.Integer, primary_key=True)
+    artist_id: int = db.Column(db.Integer, db.ForeignKey(
+        'Artist.id'), nullable=False)
+    artist: str = db.relationship(
+        'Artist', backref=db.backref('shows', cascade='all, delete'))
+    venue_id: int = db.Column(db.Integer, db.ForeignKey(
+        'Venue.id'), nullable=False)
+    venue: str = db.relationship(
+        'Venue', backref=db.backref('shows', cascade='all, delete'))
+    start_time: datetime = db.Column(db.DateTime(), nullable=False)
+
+
+def init_load():
     artist1 = Artist(
       name="Guns N Petals",
       genres=[ArtistGenre(genre="Rock n Roll")],
@@ -124,8 +133,6 @@ def init_load_artists():
     db.session.add_all([artist1, artist2, artist3])
     db.session.commit()
 
-
-def init_load_venues():
     venue1 = Venue(
         name="The Musical Hop",
         genres=[VenueGenre(genre="Jazz"), VenueGenre(genre="Reggae"), VenueGenre(genre="Swing"), VenueGenre(genre="Classical"), VenueGenre(genre="Folk")],
@@ -169,31 +176,23 @@ def init_load_venues():
     db.session.add_all([venue1, venue2, venue3])
     db.session.commit()
 
+    show1 = Show(artist=artist1, venue=venue1,
+                 start_time="2019-05-21T21:30:00.000Z")
+    show2 = Show(artist=artist2, venue=venue3,
+                 start_time="2019-06-15T23:00:00.000Z")
+    show3 = Show(artist=artist3, venue=venue3,
+                 start_time="2035-04-01T20:00:00.000Z")
+    show4 = Show(artist=artist3, venue=venue3,
+                 start_time="2035-04-08T20:00:00.000Z")
+    show5 = Show(artist=artist3, venue=venue3,
+                 start_time="2035-04-15T20:00:00.000Z")
 
-db.drop_all()
-db.create_all()
-init_load_artists()
-init_load_venues()
-
-
-# init_load_addresses()
-# init_load_genres()
-
-
-# @app.route("/addresses")
-# def get_addresswa():
-#     addresses = Address.query.all()
-#     print(addresses)
-#     return jsonify([x.__repr__() for x in addresses])
+    db.session.add_all([show1, show2, show3, show4, show5])
+    db.session.commit()
 
 
-# @app.route("/address/<address_id>")
-# def get_address(address_id):
-#     address = Address.query.filter_by(id=address_id).first()
-#     print(address)
-#     return jsonify(address.__repr__())
-
-
-@app.route("/")
-def index():
-    return "Hello World!"
+# set-up tables and load initial data
+if __name__ == "main":
+    db.drop_all()
+    db.create_all()
+    init_load()
