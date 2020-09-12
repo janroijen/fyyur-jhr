@@ -5,7 +5,7 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response
+from flask import Flask, abort, render_template, request, Response
 from flask import flash, redirect, url_for
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
@@ -100,32 +100,11 @@ def index():
 
 @app.route('/venues')
 def venues():
-    # TODO: replace with real venues data.
-    #       num_shows should be aggregated based on number of upcoming shows per venue.
-    data=[{
-      "city": "San Francisco",
-      "state": "CA",
-      "venues": [{
-        "id": 1,
-        "name": "The Musical Hop",
-        "num_upcoming_shows": 0,
-      }, {
-        "id": 3,
-        "name": "Park Square Live Music & Coffee",
-        "num_upcoming_shows": 1,
-      }]
-    }, {
-      "city": "New York",
-      "state": "NY",
-      "venues": [{
-        "id": 2,
-        "name": "The Dueling Pianos Bar",
-        "num_upcoming_shows": 0,
-      }]
-    }]
-    # data = Venue.query.all()
-    return render_template('pages/venues.html', areas=data)
-
+    try:
+        data = Venue.byLocation()
+        return render_template('pages/venues.html', areas=data)
+    except:
+        return render_template('errors/500.html')
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
@@ -145,8 +124,11 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     # shows the venue page with the given venue_id
-    data = Venue.query.get(venue_id)
-    return render_template('pages/show_venue.html', venue=data)
+    try:
+        data = Venue.query.get(venue_id).details
+        return render_template('pages/show_venue.html', venue=data)
+    except AttributeError:
+        return abort(404)
 
 #  Create Venue
 #  ----------------------------------------------------------------
@@ -172,10 +154,13 @@ def create_venue_submission():
 def delete_venue(venue_id):
     # TODO: Complete this endpoint for taking a venue_id, and using
     # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-
+    try:
+        Venue.delete(venue_id)
+    except ValueError:
+        abort(500)
     # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
     # clicking that button delete it from the db then redirect the user to the homepage
-    return None
+    return Response(status=200)
 
 #  Artists
 #  ----------------------------------------------------------------
@@ -202,8 +187,11 @@ def search_artists():
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
     # shows the venue page with the given venue_id
-    data = Artist.query.get(artist_id).details
-    return render_template('pages/show_artist.html', artist=data)
+    try:
+        data = Artist.query.get(artist_id).details
+        return render_template('pages/show_artist.html', artist=data)
+    except AttributeError:
+        return abort(404)
 
 #  Update
 #  ----------------------------------------------------------------
@@ -286,9 +274,11 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
     # displays list of shows at /shows
-    data = [show.details for show in Show.query.all()]
-    return render_template('pages/shows.html', shows=data)
-
+    try:
+        data = [show.details for show in Show.query.all()]
+        return render_template('pages/shows.html', shows=data)
+    except AttributeError:
+        return abort(404)
 
 @app.route('/shows/create')
 def create_shows():

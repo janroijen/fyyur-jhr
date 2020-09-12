@@ -9,6 +9,5 @@ DEBUG = True
 # Connect to the database
 SQLALCHEMY_DATABASE_URI = 'postgresql://david:pass234@localhost:5432/firedb'
 
-
 # Switch track modifications off to suppress warning message.
 SQLALCHEMY_TRACK_MODIFICATIONS = False

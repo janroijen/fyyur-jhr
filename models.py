@@ -1,14 +1,30 @@
 from flask import Flask
+from sqlalchemy.exc import DBAPIError
 from flask_sqlalchemy import SQLAlchemy
+from flask_moment import Moment
+from flask_migrate import Migrate
 from dataclasses import dataclass
 from typing import List
 from datetime import datetime
 
+# app = Flask(__name__)
+# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+# app.config["SQLALCHEMY_DATABASE_URI"] = \
+#     "postgresql://david:pass234@localhost:5432/firedb"
+# db = SQLAlchemy(app)
+# ----------------------------------------------------------------------------#
+# App Config.
+# ----------------------------------------------------------------------------#
+
 app = Flask(__name__)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SQLALCHEMY_DATABASE_URI"] = \
-    "postgresql://david:pass234@localhost:5432/firedb"
+moment = Moment(app)
+app.config.from_object('config')
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# ----------------------------------------------------------------------------#
+# Models.
+# ----------------------------------------------------------------------------#
 
 
 @dataclass
@@ -57,13 +73,13 @@ class Artist(db.Model):
                 "venue_image_link": show.venue.image_link,
                 "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
                 for show in upcoming_shows],
-            "past_shows_count": len(past_shows),    
+            "past_shows_count": len(past_shows),
             "past_shows": [{
                 "venue_id": show.venue_id,
                 "venue_name": show.venue.name,
                 "venue_image_link": show.venue.image_link,
                 "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
-                for show in past_shows]  
+                for show in past_shows]
         }
 
 
@@ -97,6 +113,11 @@ class Venue(db.Model):
 
     @property
     def details(self):
+        upcoming_shows = [show for show in self.shows
+                          if show.start_time >= datetime.now()]
+        past_shows = [show for show in self.shows
+                      if show.start_time < datetime.now()]
+
         return {
             "id": self.id,
             "name": self.name,
@@ -110,8 +131,59 @@ class Venue(db.Model):
             "seeking_talent": self.seeking_talent,
             "seeking_description": self.seeking_description,
             "genres": [x.genre for x in self.genres],
-            "artists": self.artists
+            "artists": self.artists,
+            "upcoming_shows_count": len(upcoming_shows),
+            "upcoming_shows": [{
+                "artist_id": show.artist_id,
+                "artist_name": show.artist.name,
+                "artist_image_link": show.venue.image_link,
+                "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
+                for show in upcoming_shows],
+            "past_shows_count": len(past_shows),   
+            "past_shows": [{
+                "artist_id": show.artist_id,
+                "artist_name": show.artist.name,
+                "artist_image_link": show.artist.image_link,
+                "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
+                for show in past_shows] 
         }
+
+    @staticmethod
+    def delete(id: int):
+        try:
+            venue = Venue.query.get(id)
+            db.session.delete(venue)
+            db.session.commit()
+        except DBAPIError:
+            db.session.rollback()
+        finally:
+            db.session.close()
+            raise ValueError
+
+    @staticmethod
+    def byLocation():
+        qrRes = Venue.query.order_by(Venue.state, Venue.city).all()
+
+        res = []
+        for r in qrRes:
+            upcoming_shows = [show for show in r.shows
+                              if show.start_time >= datetime.now()]
+            venue = {
+                    "id": r.id,
+                    "name": r.name,
+                    "num_upcoming_shows": len(upcoming_shows)
+                }
+            if len(res) > 0 and res[-1]["city"] == r.city and \
+               res[-1]["state"] == r.state:
+                res[-1]["venues"].append(venue)
+            else:
+                res.append({
+                    "city": r.city,
+                    "state": r.state,
+                    "venues": [venue]
+                })
+
+        return res
 
 
 @dataclass
