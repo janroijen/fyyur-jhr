@@ -30,6 +30,42 @@ class Artist(db.Model):
     genres: List[str] = db.relationship("ArtistGenre", backref="artist")
     venues: List[str] = db.relationship("Show", back_populates="artist")
 
+    @property
+    def details(self):
+        upcoming_shows = [show for show in self.shows
+                          if show.start_time >= datetime.now()]
+        past_shows = [show for show in self.shows
+                      if show.start_time < datetime.now()]
+
+        return {
+            "id": self.id,
+            "name": self.name,
+            "city": self.city,
+            "state": self.state,
+            "phone": self.phone,
+            "website": self.website,
+            "facebook_link": self.facebook_link,
+            "image_link": self.image_link,
+            "seeking_venue": self.seeking_venue,
+            "seeking_description": self.seeking_description,
+            "genres": [x.genre for x in self.genres],
+            "venues": self.venues,
+            "upcoming_shows_count": len(upcoming_shows),
+            "upcoming_shows": [{
+                "venue_id": show.venue_id,
+                "venue_name": show.venue.name,
+                "venue_image_link": show.venue.image_link,
+                "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
+                for show in upcoming_shows],
+            "past_shows_count": len(past_shows),    
+            "past_shows": [{
+                "venue_id": show.venue_id,
+                "venue_name": show.venue.name,
+                "venue_image_link": show.venue.image_link,
+                "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
+                for show in past_shows]  
+        }
+
 
 @dataclass
 class ArtistGenre(db.Model):
@@ -59,6 +95,24 @@ class Venue(db.Model):
     genres: List[str] = db.relationship("VenueGenre", backref="venue")
     artists: List[str] = db.relationship("Show", back_populates="venue")
 
+    @property
+    def details(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "address": self.address,
+            "city": self.city,
+            "state": self.state,
+            "phone": self.phone,
+            "website": self.website,
+            "facebook_link": self.facebook_link,
+            "image_link": self.image_link,
+            "seeking_talent": self.seeking_talent,
+            "seeking_description": self.seeking_description,
+            "genres": [x.genre for x in self.genres],
+            "artists": self.artists
+        }
+
 
 @dataclass
 class VenueGenre(db.Model):
@@ -74,13 +128,24 @@ class Show(db.Model):
     id: int = db.Column(db.Integer, primary_key=True)
     artist_id: int = db.Column(db.Integer, db.ForeignKey(
         'Artist.id'), nullable=False)
-    artist: str = db.relationship(
+    artist: Artist = db.relationship(
         'Artist', backref=db.backref('shows', cascade='all, delete'))
     venue_id: int = db.Column(db.Integer, db.ForeignKey(
         'Venue.id'), nullable=False)
-    venue: str = db.relationship(
+    venue: Venue = db.relationship(
         'Venue', backref=db.backref('shows', cascade='all, delete'))
     start_time: datetime = db.Column(db.DateTime(), nullable=False)
+
+    @property
+    def details(self):
+        return {
+            "artist_id": self.artist_id,
+            "artist_name": self.artist.name,
+            "venue_id": self.venue_id,
+            "venue_name": self.venue.name,
+            "start_time": self.start_time.strftime('%Y-%m-%d %H:%M:%S'),
+            "artist_image_link": self.artist.image_link
+        }
 
 
 def init_load():
