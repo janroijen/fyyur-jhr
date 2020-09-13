@@ -11,8 +11,9 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
-from flask_wtf import Form
-from forms import *
+# from flask_wtf import FlaskForm
+from sqlalchemy.exc import DBAPIError
+from forms import VenueForm, ArtistForm, ShowForm
 from flask_migrate import Migrate
 from models import Show, Artist, Venue
 # ----------------------------------------------------------------------------#
@@ -103,23 +104,18 @@ def venues():
     try:
         data = Venue.byLocation()
         return render_template('pages/venues.html', areas=data)
-    except:
+    except DBAPIError:
         return render_template('errors/500.html')
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for Hop should return "The Musical Hop".
-    # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-    response = {
-      "count": 1,
-      "data": [{
-        "id": 2,
-        "name": "The Dueling Pianos Bar",
-        "num_upcoming_shows": 0,
-      }]
-    }
-    return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+    try:
+        response = Venue.search(request.form.get("search_term"))
+        return render_template('pages/search_venues.html', results=response,
+                               search_term=request.form.get('search_term', ''))
+    except DBAPIError:
+        return render_template("errors/500.html")
+
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -133,10 +129,12 @@ def show_venue(venue_id):
 #  Create Venue
 #  ----------------------------------------------------------------
 
+
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
     form = VenueForm()
     return render_template('forms/new_venue.html', form=form)
+
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
@@ -149,6 +147,7 @@ def create_venue_submission():
     # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
     # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
+
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -164,25 +163,23 @@ def delete_venue(venue_id):
 
 #  Artists
 #  ----------------------------------------------------------------
+
+
 @app.route('/artists')
 def artists():
     data = Artist.query.all()
     return render_template('pages/artists.html', artists=data)
 
+
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
-    # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-    # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
-    # search for "band" should return "The Wild Sax Band".
-    response={
-      "count": 1,
-      "data": [{
-        "id": 4,
-        "name": "Guns N Petals",
-        "num_upcoming_shows": 0,
-      }]
-    }
-    return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+    try:
+        response = Artist.search(request.form.get("search_term"))
+        return render_template('pages/search_artists.html', results=response,
+                               search_term=request.form.get('search_term', ''))
+    except DBAPIError:
+        return render_template("errors/500.html")
+
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
@@ -195,6 +192,8 @@ def show_artist(artist_id):
 
 #  Update
 #  ----------------------------------------------------------------
+
+
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
     form = ArtistForm()
@@ -214,12 +213,14 @@ def edit_artist(artist_id):
     # TODO: populate form with fields from artist with ID <artist_id>
     return render_template('forms/edit_artist.html', form=form, artist=artist)
 
+
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
     # TODO: take values from the form submitted, and update existing
     # artist record with ID <artist_id> using the new attributes
 
     return redirect(url_for('show_artist', artist_id=artist_id))
+
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
@@ -288,19 +289,30 @@ def create_shows():
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
-    # called to create new shows in the db, upon submitting new show listing form
-    # TODO: insert form data as a new Show record in the db, instead
+    # called to create new shows in the db, upon submitting new show form
+    try:
+        venue_id = request.form.get("venue_id")
+        artist_id = request.form.get("artist_id")
+        start_time = request.form.get("start_time")
 
-    # on successful db insert, flash success
-    flash('Show was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Show could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
+        show = Show(venue_id=venue_id, artist_id=artist_id,
+                    start_time=start_time)
+        db.session.add(show)
+        db.session.commit()
+
+        flash('Show was successfully listed!')
+    except DBAPIError:
+        flash('An error occurred. Show could not be listed.')
+    finally:
+        db.session.close()
+
     return render_template('pages/home.html')
+
 
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('errors/404.html'), 404
+
 
 @app.errorhandler(500)
 def server_error(error):

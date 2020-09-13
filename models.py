@@ -82,6 +82,25 @@ class Artist(db.Model):
                 for show in past_shows]
         }
 
+    @staticmethod
+    def search(search_term=""):
+        qrRes = Artist.query \
+                    .filter(Artist.name.ilike("%" + search_term + "%")) \
+                    .order_by(Artist.name).all()
+
+        res = {
+            "count": len(qrRes),
+            "data": [{
+                "id": artist.id,
+                "name": artist.name,
+                "num_upcoming_shows": len(
+                    [show for show in artist.shows
+                     if show.start_time >= datetime.now()])
+            } for artist in qrRes]
+        }
+
+        return res
+
 
 @dataclass
 class ArtistGenre(db.Model):
@@ -163,7 +182,7 @@ class Venue(db.Model):
     @staticmethod
     def byLocation():
         qrRes = Venue.query.order_by(Venue.state, Venue.city).all()
-
+        
         res = []
         for r in qrRes:
             upcoming_shows = [show for show in r.shows
@@ -182,6 +201,25 @@ class Venue(db.Model):
                     "state": r.state,
                     "venues": [venue]
                 })
+
+        return res
+
+    @staticmethod
+    def search(search_term=""):
+        qrRes = Venue.query \
+                    .filter(Venue.name.ilike("%" + search_term + "%")) \
+                    .order_by(Venue.state, Venue.city).all()
+
+        res = {
+            "count": len(qrRes),
+            "data": [{
+                "id": venue.id,
+                "name": venue.name,
+                "num_upcoming_shows": len(
+                    [show for show in venue.shows
+                     if show.start_time >= datetime.now()])
+            } for venue in qrRes]
+        }
 
         return res
 
