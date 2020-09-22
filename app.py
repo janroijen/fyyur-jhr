@@ -12,7 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
 # from flask_wtf import FlaskForm
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from forms import VenueForm, ArtistForm, ShowForm
 from flask_migrate import Migrate
 from models import Show, Artist, Venue
@@ -138,27 +138,22 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    try:
+        venue = Venue.create(request.form)
+        flash('Venue ' + venue.name + ' was successfully listed!')
+    except (DBAPIError, SQLAlchemyError):
+        flash('An error occurred. Venue ' + request.form["name"] + ' could not be listed.')
 
-    # on successful db insert, flash success
-    flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
-    # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
     return render_template('pages/home.html')
 
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
-    # TODO: Complete this endpoint for taking a venue_id, and using
-    # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
     try:
         Venue.delete(venue_id)
-    except ValueError:
-        abort(500)
-    # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
-    # clicking that button delete it from the db then redirect the user to the homepage
+    except (DBAPIError, SQLAlchemyError):
+        abort(404)
+ 
     return Response(status=200)
 
 #  Artists
@@ -248,25 +243,36 @@ def edit_venue_submission(venue_id):
     # venue record with ID <venue_id> using the new attributes
     return redirect(url_for('show_venue', venue_id=venue_id))
 
+
 #  Create Artist
 #  ----------------------------------------------------------------
+
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
     form = ArtistForm()
     return render_template('forms/new_artist.html', form=form)
 
+
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
-    # called upon submitting the new artist listing form
-    # TODO: insert form data as a new Venue record in the db, instead
-    # TODO: modify data to be the data object returned from db insertion
+    try:
+        artist = Artist.create(request.form)
+        flash('Artist ' + artist.name + ' was successfully listed!')
+    except (DBAPIError, SQLAlchemyError):
+        flash('An error occurred. Artist ' + request.form["name"] + ' could not be listed.')
 
-    # on successful db insert, flash success
-    flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    # TODO: on unsuccessful db insert, flash an error instead.
-    # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
     return render_template('pages/home.html')
+
+
+@app.route('/artists/<artist_id>', methods=['DELETE'])
+def delete_artist(artist_id):
+    try:
+        Artist.delete(artist_id)
+    except (DBAPIError, SQLAlchemyError):
+        abort(404)
+
+    return Response(status=200)
 
 
 #  Shows

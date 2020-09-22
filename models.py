@@ -1,5 +1,5 @@
 from flask import Flask
-from sqlalchemy.exc import DBAPIError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 from flask_sqlalchemy import SQLAlchemy
 from flask_moment import Moment
 from flask_migrate import Migrate
@@ -81,6 +81,44 @@ class Artist(db.Model):
                 "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
                 for show in past_shows]
         }
+
+    @staticmethod
+    def create(artistRequest):
+        artist = Artist(
+            name=artistRequest["name"],
+            city=artistRequest["city"],
+            state=artistRequest["state"],
+            phone=artistRequest["phone"],
+            website=artistRequest["website"],
+            facebook_link=artistRequest["facebook_link"],
+            image_link=artistRequest["image_link"],
+            genres=[ArtistGenre(genre=genre)
+                    for genre in artistRequest.getlist("genres")]
+        )
+
+        try:
+            db.session.add(artist)
+            db.session.commit()
+        except (DBAPIError, SQLAlchemyError) as e:
+            db.session.rollback()
+            raise e
+        finally:
+            pass
+            # db.session.close()
+
+        return artist
+
+    @staticmethod
+    def delete(id: int):
+        try:
+            artist = Artist.query.get(id)
+            db.session.delete(artist)
+            db.session.commit()
+        except (DBAPIError, SQLAlchemyError) as e:
+            db.session.rollback()
+            raise e
+        finally:
+            db.session.close()
 
     @staticmethod
     def search(search_term=""):
@@ -168,16 +206,46 @@ class Venue(db.Model):
         }
 
     @staticmethod
+    def create(venueRequest):
+        venue = Venue(
+            name=venueRequest["name"],
+            city=venueRequest["city"],
+            state=venueRequest["state"],
+            address=venueRequest["address"],
+            phone=venueRequest["phone"],
+            website=venueRequest["website"],
+            facebook_link=venueRequest["facebook_link"],
+            image_link=venueRequest["image_link"],
+            genres=[VenueGenre(genre=genre)
+                    for genre in venueRequest.getlist("genres")]
+        )
+
+        try:
+            db.session.add(venue)
+            db.session.commit()
+        except (DBAPIError, SQLAlchemyError) as e:
+            db.session.rollback()
+            raise e
+        finally:
+            pass
+            # db.session.close()
+
+        return venue
+
+
+
+    @staticmethod
     def delete(id: int):
         try:
             venue = Venue.query.get(id)
             db.session.delete(venue)
             db.session.commit()
-        except DBAPIError:
+        except (DBAPIError, SQLAlchemyError) as e:
             db.session.rollback()
+            raise e
         finally:
             db.session.close()
-            raise ValueError
+            
 
     @staticmethod
     def byLocation():

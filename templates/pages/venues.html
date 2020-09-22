@@ -6,11 +6,12 @@
 	<ul class="items">
 		{% for venue in area.venues %}
 		<li>
-			<a href="/venues/{{ venue.id }}">
+			<a href="/venues/{{ venue.id }}" style="display:inline-block;min-width:300px">
 				<i class="fas fa-music"></i>
-				<div class="item">
-					<h5>{{ venue.name }}</h5>
-				</div>
+					<span>{{ venue.name }}</span>
+			</a>
+			<a href="#" id={{venue.id}} onclick="fetch('/venues/{{venue.id}}', {method: 'DELETE'})" style="display:inline-block;">
+				<i class="fa fa-trash" style="color:gray"></i>
 			</a>
 		</li>
 		{% endfor %}
