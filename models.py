@@ -121,6 +121,29 @@ class Artist(db.Model):
             db.session.close()
 
     @staticmethod
+    def find(id: int):
+        artist = Artist.query.get(id)
+        if artist is None:
+            return None
+        else:
+            return artist.details
+
+    @staticmethod
+    def update(id: int, artistRequest):
+        artist = Artist.query.get(id)
+        artist.name = artistRequest["name"],
+        artist.city = artistRequest["city"],
+        artist.state = artistRequest["state"],
+        artist.phone = artistRequest["phone"],
+        artist.website = artistRequest["website"],
+        artist.facebook_link = artistRequest["facebook_link"],
+        artist.image_link = artistRequest["image_link"],
+        artist.genres = [ArtistGenre(genre=genre)
+                         for genre in artistRequest.getlist("genres")]
+
+        db.session.commit()
+
+    @staticmethod
     def search(search_term=""):
         qrRes = Artist.query \
                     .filter(Artist.name.ilike("%" + search_term + "%")) \
@@ -232,6 +255,29 @@ class Venue(db.Model):
 
         return venue
 
+    @staticmethod
+    def find(id: int):
+        venue = Venue.query.get(id)
+        if venue is None:
+            return None
+        else:
+            return venue.details
+
+    @staticmethod
+    def update(id: int, venueRequest):
+        venue = Venue.query.get(id)
+        venue.name = venueRequest["name"],
+        venue.city = venueRequest["city"],
+        venue.state = venueRequest["state"],
+        venue.address = venueRequest["address"],
+        venue.phone = venueRequest["phone"],
+        venue.website = venueRequest["website"],
+        venue.facebook_link = venueRequest["facebook_link"],
+        venue.image_link = venueRequest["image_link"],
+        venue.genres = [VenueGenre(genre=genre)
+                        for genre in venueRequest.getlist("genres")]
+
+        db.session.commit()
 
 
     @staticmethod
