@@ -153,7 +153,7 @@ def delete_venue(venue_id):
         Venue.delete(venue_id)
     except (DBAPIError, SQLAlchemyError):
         abort(404)
- 
+
     return Response(status=200)
 
 #  Artists

@@ -7,11 +7,6 @@ from dataclasses import dataclass
 from typing import List
 from datetime import datetime
 
-# app = Flask(__name__)
-# app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# app.config["SQLALCHEMY_DATABASE_URI"] = \
-#     "postgresql://david:pass234@localhost:5432/firedb"
-# db = SQLAlchemy(app)
 # ----------------------------------------------------------------------------#
 # App Config.
 # ----------------------------------------------------------------------------#
@@ -279,7 +274,6 @@ class Venue(db.Model):
 
         db.session.commit()
 
-
     @staticmethod
     def delete(id: int):
         try:
@@ -291,12 +285,11 @@ class Venue(db.Model):
             raise e
         finally:
             db.session.close()
-            
 
     @staticmethod
     def byLocation():
         qrRes = Venue.query.order_by(Venue.state, Venue.city).all()
-        
+
         res = []
         for r in qrRes:
             upcoming_shows = [show for show in r.shows
