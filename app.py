@@ -62,6 +62,7 @@ def venues():
     except DBAPIError:
         return render_template('errors/500.html')
 
+
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
     try:
@@ -97,7 +98,8 @@ def create_venue_submission():
         venue = Venue.create(request.form)
         flash('Venue ' + venue.name + ' was successfully listed!')
     except (DBAPIError, SQLAlchemyError):
-        flash('An error occurred. Venue ' + request.form["name"] + ' could not be listed.')
+        flash('An error occurred. Venue ' +
+              request.form["name"] + ' could not be listed.')
 
     return render_template('pages/home.html')
 
@@ -170,6 +172,7 @@ def edit_venue(venue_id):
         form = VenueForm(data=venue)
         return render_template('forms/edit_venue.html', form=form, venue=venue)
 
+
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
     Venue.update(venue_id, request.form)
@@ -192,7 +195,8 @@ def create_artist_submission():
         artist = Artist.create(request.form)
         flash('Artist ' + artist.name + ' was successfully listed!')
     except (DBAPIError, SQLAlchemyError):
-        flash('An error occurred. Artist ' + request.form["name"] + ' could not be listed.')
+        flash('An error occurred. Artist ' +
+              request.form["name"] + ' could not be listed.')
 
     return render_template('pages/home.html')
 
@@ -262,7 +266,8 @@ def server_error(error):
 if not app.debug:
     file_handler = FileHandler('error.log')
     file_handler.setFormatter(
-        Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
+        Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]')
     )
     app.logger.setLevel(logging.INFO)
     file_handler.setLevel(logging.INFO)

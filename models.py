@@ -141,8 +141,8 @@ class Artist(db.Model):
     @staticmethod
     def search(search_term=""):
         qrRes = Artist.query \
-                    .filter(Artist.name.ilike("%" + search_term + "%")) \
-                    .order_by(Artist.name).all()
+            .filter(Artist.name.ilike("%" + search_term + "%")) \
+            .order_by(Artist.name).all()
 
         res = {
             "count": len(qrRes),
@@ -214,13 +214,13 @@ class Venue(db.Model):
                 "artist_image_link": show.venue.image_link,
                 "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
                 for show in upcoming_shows],
-            "past_shows_count": len(past_shows),   
+            "past_shows_count": len(past_shows),
             "past_shows": [{
                 "artist_id": show.artist_id,
                 "artist_name": show.artist.name,
                 "artist_image_link": show.artist.image_link,
                 "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')}
-                for show in past_shows] 
+                for show in past_shows]
         }
 
     @staticmethod
@@ -295,10 +295,10 @@ class Venue(db.Model):
             upcoming_shows = [show for show in r.shows
                               if show.start_time >= datetime.now()]
             venue = {
-                    "id": r.id,
-                    "name": r.name,
-                    "num_upcoming_shows": len(upcoming_shows)
-                }
+                "id": r.id,
+                "name": r.name,
+                "num_upcoming_shows": len(upcoming_shows)
+            }
             if len(res) > 0 and res[-1]["city"] == r.city and \
                res[-1]["state"] == r.state:
                 res[-1]["venues"].append(venue)
@@ -314,8 +314,8 @@ class Venue(db.Model):
     @staticmethod
     def search(search_term=""):
         qrRes = Venue.query \
-                    .filter(Venue.name.ilike("%" + search_term + "%")) \
-                    .order_by(Venue.state, Venue.city).all()
+            .filter(Venue.name.ilike("%" + search_term + "%")) \
+            .order_by(Venue.state, Venue.city).all()
 
         res = {
             "count": len(qrRes),
@@ -367,37 +367,37 @@ class Show(db.Model):
 
 def init_load():
     artist1 = Artist(
-      name="Guns N Petals",
-      genres=[ArtistGenre(genre="Rock n Roll")],
-      city="San Francisco",
-      state="CA",
-      phone="326-123-5000",
-      website="https://www.gunsnpetalsband.com",
-      facebook_link="https://www.facebook.com/GunsNPetals",
-      seeking_venue=True,
-      seeking_description="Looking for shows to perform at in the San Francisco Bay Area!",
-      image_link="https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
+        name="Guns N Petals",
+        genres=[ArtistGenre(genre="Rock n Roll")],
+        city="San Francisco",
+        state="CA",
+        phone="326-123-5000",
+        website="https://www.gunsnpetalsband.com",
+        facebook_link="https://www.facebook.com/GunsNPetals",
+        seeking_venue=True,
+        seeking_description="Looking for shows to perform at in the San Francisco Bay Area!",
+        image_link="https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
     )
 
     artist2 = Artist(
-      name="Matt Quevedo",
-      genres=[ArtistGenre(genre="Jazz")],
-      city="New York",
-      state="NY",
-      phone="300-400-5000",
-      facebook_link="https://www.facebook.com/mattquevedo923251523",
-      seeking_venue=False,
-      image_link="https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+        name="Matt Quevedo",
+        genres=[ArtistGenre(genre="Jazz")],
+        city="New York",
+        state="NY",
+        phone="300-400-5000",
+        facebook_link="https://www.facebook.com/mattquevedo923251523",
+        seeking_venue=False,
+        image_link="https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
     )
 
     artist3 = Artist(
-      name="The Wild Sax Band",
-      genres=[ArtistGenre(genre="Jazz"), ArtistGenre(genre="Classical")],
-      city="San Francisco",
-      state="CA",
-      phone="432-325-5432",
-      seeking_venue=False,
-      image_link="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80"
+        name="The Wild Sax Band",
+        genres=[ArtistGenre(genre="Jazz"), ArtistGenre(genre="Classical")],
+        city="San Francisco",
+        state="CA",
+        phone="432-325-5432",
+        seeking_venue=False,
+        image_link="https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80"
     )
 
     db.session.add_all([artist1, artist2, artist3])
@@ -405,7 +405,8 @@ def init_load():
 
     venue1 = Venue(
         name="The Musical Hop",
-        genres=[VenueGenre(genre="Jazz"), VenueGenre(genre="Reggae"), VenueGenre(genre="Swing"), VenueGenre(genre="Classical"), VenueGenre(genre="Folk")],
+        genres=[VenueGenre(genre="Jazz"), VenueGenre(genre="Reggae"), VenueGenre(
+            genre="Swing"), VenueGenre(genre="Classical"), VenueGenre(genre="Folk")],
         address="1015 Folsom Street",
         city="San Francisco",
         state="CA",
@@ -419,7 +420,8 @@ def init_load():
 
     venue2 = Venue(
         name="The Dueling Pianos Bar",
-        genres=[VenueGenre(genre="Classical"), VenueGenre(genre="R&B"), VenueGenre(genre="Hip-Hop")],
+        genres=[VenueGenre(genre="Classical"), VenueGenre(
+            genre="R&B"), VenueGenre(genre="Hip-Hop")],
         address="335 Delancey Street",
         city="New York",
         state="NY",
@@ -432,7 +434,8 @@ def init_load():
 
     venue3 = Venue(
         name="Park Square Live Music & Coffee",
-        genres=[VenueGenre(genre="Rock n Roll"), VenueGenre(genre="Jazz"), VenueGenre(genre="Classical"), VenueGenre(genre="Folk")],
+        genres=[VenueGenre(genre="Rock n Roll"), VenueGenre(
+            genre="Jazz"), VenueGenre(genre="Classical"), VenueGenre(genre="Folk")],
         address="34 Whiskey Moore Ave",
         city="San Francisco",
         state="CA",
@@ -463,6 +466,6 @@ def init_load():
 
 # set-up tables and load initial data
 if __name__ == "__main__":
-    db.drop_all()
-    db.create_all()
+    # db.drop_all()
+    # db.create_all()
     init_load()
