@@ -94,8 +94,9 @@ def create_venue_form():
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    form = VenueForm(request.form)
     try:
-        venue = Venue.create(request.form)
+        venue = Venue.create(form)
         flash('Venue ' + venue.name + ' was successfully listed!')
     except (DBAPIError, SQLAlchemyError):
         flash('An error occurred. Venue ' +
@@ -158,7 +159,8 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
-    Artist.update(artist_id, request.form)
+    form = ArtistForm(request.form)
+    Artist.update(artist_id, form)
     return redirect(url_for('show_artist', artist_id=artist_id))
 
 
@@ -175,7 +177,8 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-    Venue.update(venue_id, request.form)
+    form = VenueForm(request.form)
+    Venue.update(venue_id, form)
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
@@ -191,8 +194,9 @@ def create_artist_form():
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    form = ArtistForm(request.form)
     try:
-        artist = Artist.create(request.form)
+        artist = Artist.create(form)
         flash('Artist ' + artist.name + ' was successfully listed!')
     except (DBAPIError, SQLAlchemyError):
         flash('An error occurred. Artist ' +
@@ -234,10 +238,11 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
     # called to create new shows in the db, upon submitting new show form
+    form = ShowForm(request.form)
     try:
-        venue_id = request.form.get("venue_id")
-        artist_id = request.form.get("artist_id")
-        start_time = request.form.get("start_time")
+        venue_id = form.venue_id.data
+        artist_id = form.artist_id.data
+        start_time = form.start_time.data
 
         show = Show(venue_id=venue_id, artist_id=artist_id,
                     start_time=start_time)

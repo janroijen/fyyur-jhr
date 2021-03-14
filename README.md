@@ -117,9 +117,9 @@ createdb -h localhost -U admin firedb
 5. Run the development server:
 
 ```
-$ export FLASK_APP=myapp
+$ export FLASK_APP=app.py
 $ export FLASK_ENV=development # enables debug mode
-$ python3 app.py
+$ flask run
 ```
 
 6. Navigate to Home page [http://localhost:5000](http://localhost:5000)

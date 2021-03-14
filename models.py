@@ -80,15 +80,15 @@ class Artist(db.Model):
     @staticmethod
     def create(artistRequest):
         artist = Artist(
-            name=artistRequest["name"],
-            city=artistRequest["city"],
-            state=artistRequest["state"],
-            phone=artistRequest["phone"],
-            website=artistRequest["website"],
-            facebook_link=artistRequest["facebook_link"],
-            image_link=artistRequest["image_link"],
+            name=artistRequest.name.data,
+            city=artistRequest.city.data,
+            state=artistRequest.state.data,
+            phone=artistRequest.phone.data,
+            website=artistRequest.website.data,
+            facebook_link=artistRequest.facebook_link.data,
+            image_link=artistRequest.image_link.data,
             genres=[ArtistGenre(genre=genre)
-                    for genre in artistRequest.getlist("genres")]
+                    for genre in artistRequest.genres.data]
         )
 
         try:
@@ -126,15 +126,15 @@ class Artist(db.Model):
     @staticmethod
     def update(id: int, artistRequest):
         artist = Artist.query.get(id)
-        artist.name = artistRequest["name"],
-        artist.city = artistRequest["city"],
-        artist.state = artistRequest["state"],
-        artist.phone = artistRequest["phone"],
-        artist.website = artistRequest["website"],
-        artist.facebook_link = artistRequest["facebook_link"],
-        artist.image_link = artistRequest["image_link"],
+        artist.name = artistRequest.name.data,
+        artist.city = artistRequest.city.data,
+        artist.state = artistRequest.state.data,
+        artist.phone = artistRequest.phone.data,
+        artist.website = artistRequest.website.data,
+        artist.facebook_link = artistRequest.facebook_link.data,
+        artist.image_link = artistRequest.image_link.data,
         artist.genres = [ArtistGenre(genre=genre)
-                         for genre in artistRequest.getlist("genres")]
+                         for genre in artistRequest.genres.data]
 
         db.session.commit()
 
@@ -226,16 +226,16 @@ class Venue(db.Model):
     @staticmethod
     def create(venueRequest):
         venue = Venue(
-            name=venueRequest["name"],
-            city=venueRequest["city"],
-            state=venueRequest["state"],
-            address=venueRequest["address"],
-            phone=venueRequest["phone"],
-            website=venueRequest["website"],
-            facebook_link=venueRequest["facebook_link"],
-            image_link=venueRequest["image_link"],
+            name=venueRequest.name.data,
+            city=venueRequest.city.data,
+            state=venueRequest.state.data,
+            address=venueRequest.address.data,
+            phone=venueRequest.phone.data,
+            website=venueRequest.website.data,
+            facebook_link=venueRequest.facebook_link.data,
+            image_link=venueRequest.image_link.data,
             genres=[VenueGenre(genre=genre)
-                    for genre in venueRequest.getlist("genres")]
+                    for genre in venueRequest.genres.data]
         )
 
         try:
@@ -261,16 +261,16 @@ class Venue(db.Model):
     @staticmethod
     def update(id: int, venueRequest):
         venue = Venue.query.get(id)
-        venue.name = venueRequest["name"],
-        venue.city = venueRequest["city"],
-        venue.state = venueRequest["state"],
-        venue.address = venueRequest["address"],
-        venue.phone = venueRequest["phone"],
-        venue.website = venueRequest["website"],
-        venue.facebook_link = venueRequest["facebook_link"],
-        venue.image_link = venueRequest["image_link"],
+        venue.name = venueRequest.name.data,
+        venue.city = venueRequest.city.data,
+        venue.state = venueRequest.state.data,
+        venue.address = venueRequest.address.data,
+        venue.phone = venueRequest.phone.data,
+        venue.website = venueRequest.website.data,
+        venue.facebook_link = venueRequest.facebook_link.data,
+        venue.image_link = venueRequest.image_link.data,
         venue.genres = [VenueGenre(genre=genre)
-                        for genre in venueRequest.getlist("genres")]
+                        for genre in venueRequest.genres.data]
 
         db.session.commit()
 
